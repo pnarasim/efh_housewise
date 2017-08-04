@@ -1,0 +1,12 @@
+quick install notes:
+
+opkg install python-pip python-dev libmysqlclient-dev
+pip install MySQL-python
+pip install --egg mysql-connector-python-rf
+pip install pybluez
+ pip install gattlib
+
+
+
+
+

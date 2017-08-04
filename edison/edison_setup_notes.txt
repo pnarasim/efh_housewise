@@ -1,0 +1,20 @@
+1 Flash an image on to your edison mini breakout : https://software.intel.com/en-us/flashing-firmware-on-your-intel-edison-board-linux
+- download latest yocto poky image from https://software.intel.com/iot/hardware/edison/downloads
+- download the linux installer (from the Installers tab on this page) https://software.intel.com/iot/hardware/edison/downloads (this may not work if u have > ubuntu15.04. if so, do the manual flashing steps : https://software.intel.com/en-us/get-started-edison-linux-step2)
+
+2. Set up Edison board: https://www-ssl.intel.com/content/www/us/en/support/boards-and-kits/000006285.html
+
+3. Set up BLE on Edison board : https://github.com/w4ilun/edison-guides/wiki/Configure-Intel-Edison-for-BLE---Bluetooth-Smart-Development
+
+4. setup serial and use the configure_edison to setup wifi etc
+
+
+
+
+
+
+
+
+
+===========
+1. the arduino IDE was not compiling for the edison board. i used the board manager to install the intel edison i686 dev kit but got some errors. said the post install scripts failed. so chnaged the +111 to /111 as per this thread https://communities.intel.com/thread/48053 and the sdk install seemed to complete. 

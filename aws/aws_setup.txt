@@ -1,0 +1,14 @@
+1. Create a login on AWS
+2. Start a basic EC2 instance.
+3. ssh to ur instance with the .pem key
+4. install LAMP on your ec2 instance 
+http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-LAMP.html
+5. change ur security group to allow incoming ssh, http and mysql conns
+
+===========
+mysql setup
+mysql -u <user> -p
+<set up ur db, tables>
+<grant remote access to a user>
+create user 'hw1'@'%' identified by 'efh@2017';
+GRANT SELECT,INSERT,UPDATE,DELETE,CREATE on housewise.* to 'hw1'@'%';
