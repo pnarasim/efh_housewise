@@ -1,4 +1,5 @@
-# Project Plan for Team SP3 (Shambhavi, Poornima, Priya K, Priya N)
+# Project Housewise 
+## By Shambhavi, Poornima, Priya K, Priya N
 
 ## Brief Introduction
 
