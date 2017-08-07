@@ -1,0 +1,18 @@
+[31mScanning for devices...[0m
+    Device (new): [37m01:00:0c:0a:0e:0b[0m (random), -68 dBm 
+	Complete Local Name: '[36mHW-ID2[0m'
+	0x22: <27>
+	0x33: <27>
+	Manufacturer: <4c>
+    Device (new): [37mb0:34:95:31:56:93[0m (public), -68 dBm 
+	Flags: <1a>
+	Manufacturer: <4c0009060314c0a80103>
+    Device (new): [37mf5:24:66:e4:f8:dc[0m (random), -72 dBm 
+	Flags: <06>
+	Manufacturer: <4c000215e2c56db5dffb48d2b060d0f5a71096e000000000c5>
+    Device (new): [37md1:54:83:2f:46:c1[0m (random), -65 dBm 
+	Flags: <06>
+	Manufacturer: <4c000215e2c56db5dffb48d2b060d0f5a71096e000000000c5>
+    Device (new): [37md9:06:9e:aa:ac:ee[0m (random), -72 dBm 
+	Flags: <06>
+	Manufacturer: <4c000215e2c56db5dffb48d2b060d0f5a71096e000000000c5>
