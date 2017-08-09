@@ -10,13 +10,17 @@ import string
 import re
 
 add_reading= ("INSERT INTO hw_data " 
-                " (house_id, sensor_id, sensor_value, timeofpost) " 
+                " (house_id, sensor_id, sensor_data, timeofpost) " 
                 " VALUES (%s, %s, %s, %s)" )
 #data_reading = (house_id, '2', '33.33', datetime.now().date())
 
 config = ConfigParser.ConfigParser()
+#values
 noise_level=0
 co2_level=0
+#ids in the db
+noise_id=1
+co2_id=2
 hw_str = ''
 noise_level_id = ''
 co2_level_id = ''
@@ -72,16 +76,18 @@ def main():
     #test
     #show_dbs(cursor)
     # get data and post it to the table
-    noise_level, co2_level = scan_and_get_sensor_readings(hw_str)
-    n = int(noise_level, 16)
-    c = int(co2_level, 16)
-    data_reading = (house_id, noise_level_id, n, datetime.now().date())
-    cursor.execute(add_reading, data_reading)
-    data_reading = (house_id, co2_level_id, c, datetime.now().date())
+    while (1):
+        noise_level, co2_level = scan_and_get_sensor_readings(hw_str)
+        n = int(noise_level, 16)
+        c = int(co2_level, 16)
+        data_reading = (house_id, noise_id, n, datetime.now())
+        cursor.execute(add_reading, data_reading)
+        data_reading = (house_id, co2_id, c, datetime.now())
 
-    cursor.execute(add_reading, data_reading)
-    #print_table("hw_data")
-    cnx.commit()
+        cursor.execute(add_reading, data_reading)
+        #print_table("hw_data")
+        cnx.commit()
+
     cursor.close()
     cnx.close()
 

@@ -18,9 +18,10 @@ $query = "SELECT * FROM hw_data where house_id=$house_id";
 mysqli_query($db, $query) or die('Error querying database.');
 $result = mysqli_query($db, $query);
 $row = mysqli_fetch_array($result);
-
+echo 'printing all sensor values for house id '.$house_id.' <br>';
+echo 'Sensor ID  : Sensor Value  :  Time of Post'.'<br>';
 while ($row = mysqli_fetch_array($result)) {
- echo $row['house_id'] . ' ' . $row['sensor_id'] . ': ' . $row['sensor_value'] .'<br />';
+ echo $row['sensor_id'] . ': ' . $row['sensor_data'] .'  :  '.$row['timeofpost'].'<br />';
 }
 
 //Step 4
