@@ -78,11 +78,16 @@ def main():
     # get data and post it to the table
     while (1):
         noise_level, co2_level = scan_and_get_sensor_readings(hw_str)
-        n = int(noise_level, 16)
-        c = int(co2_level, 16)
-        data_reading = (house_id, noise_id, n, datetime.now())
+        n = int(noise_level, 16) 
+        c = int(co2_level,16 )
+        #we reduced the the noise to 1 byte to fit easily in the beacon
+        noise_calibrated = n * 16 
+        co2_calibrated = c * 16 
+        print("noise = ", noise_calibrated)
+        print("co2 = ", co2_calibrated)
+        data_reading = (house_id, noise_id, noise_calibrated, datetime.now())
         cursor.execute(add_reading, data_reading)
-        data_reading = (house_id, co2_id, c, datetime.now())
+        data_reading = (house_id, co2_id, co2_calibrated, datetime.now())
 
         cursor.execute(add_reading, data_reading)
         #print_table("hw_data")

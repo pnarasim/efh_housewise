@@ -159,7 +159,7 @@ LDFLAGS += -Xlinker
 LDFLAGS += -Map=$(OUTPUT_DIR)/$(OUTPUT_NAME).map
 # use newlib in nano version
 LDFLAGS += --specs=nano.specs
-LDFLAGS += -lc -lnosys
+LDFLAGS += -lc -lnosys 
 LDFLAGS += -mcpu=$(CPU) 
 LDFLAGS += -mthumb 
 LDFLAGS += -mabi=aapcs
@@ -231,7 +231,7 @@ $(OBJ_DIR)/%.o : %.S
 $(OUTPUT_DIR)/$(OUTPUT_NAME).elf : $(BUILD_DIRS) $(C_OBJ) $(ASSEMBLY_OBJ)
 	@echo
 	@echo "LD $(OUTPUT_DIR)/$(OUTPUT_NAME).elf" 
-	$(Q)$(CC) $(LDFLAGS) $(C_OBJ) $(ASSEMBLY_OBJ) -o $(OUTPUT_DIR)/$(OUTPUT_NAME).elf
+	$(Q)$(CC) $(LDFLAGS) $(C_OBJ) $(ASSEMBLY_OBJ) -o $(OUTPUT_DIR)/$(OUTPUT_NAME).elf -lm
 
 ## Create binary .bin file from the .elf file
 $(OUTPUT_DIR)/$(OUTPUT_NAME).bin : $(OUTPUT_DIR)/$(OUTPUT_NAME).elf

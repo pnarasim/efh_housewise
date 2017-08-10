@@ -53,9 +53,32 @@
 #include "ble_adv.h"
 #include "ms_timer.h"
 #include "simple_adc.h"
+#include "math.h"
 
 int16_t noise_level = 0;
 int16_t co2_level = 0;
+
+#define BYTE_FACTOR 16
+//Ro is initialized to 10 kilo ohms
+float Ro = 10; 
+
+//define the load resistance on the board, in kilo ohms
+#define RL_VALUE (10)
+//(Sensor resistance in clean air)/RO which is derived from the chart in datasheet
+#define RO_CLEAN_AIR_FACTOR (9.83)
+#define SMOKE (1)
+
+//two points from LPG curve are taken point1:(200,1.6) point2(10000,0.26) 
+//take log of each point (lg200, lg 1.6)=(2.3,0.20)  (lg10000,lg0.26)=(4,-0.58) 
+//find the slope using these points. take point1 as reference
+float LPGCurve[3] = {2.3,0.20,-0.45};
+                                                                                                          
+//data format:{ x, y, slope};
+//two points from smoke curve are taken point1:(200,3.4) point2(10000,0.62) 
+//take log of each point (lg200, lg3.4)=(2.3,0.53)  (lg10000,lg0.63)=(4,-0.20) 
+//find the slope using these points. take point1 as reference
+float SmokeCurve[3] ={2.3,0.53,-0.43};
+                                                      
 
 /** @brief Configure the RGB LED pins as output and turn off LED */
 static void rgb_led_init(void)
@@ -95,46 +118,100 @@ static void led_red_on(void)
     hal_gpio_pin_write(LED_RED, (LEDS_ACTIVE_STATE));
 }
 
-/** @brief read_adc pin 1 and 2*/
+/** @brief read_adc pin 1 and 2 every 100ms but averages for 2 sec*/
+static int GetPercentage(float ratio, float *curve)
+{                                                                          
+  //Using slope,ratio(y2) and another point(x1,y1) on line we will find
+  // gas concentration(x2) using x2 = [((y2-y1)/slope)+x1]
+  // as in curves are on logarithmic coordinate, power of 10 is taken to convert result to non-logarithmic.
+  return (pow(10,( ((log(ratio)-curve[1])/curve[2]) + curve[0])));
+}
+
+
+float ResistanceCalculation(uint32_t raw_adc)
+{                                                         
+  // sensor and load resistor forms a voltage divider. so using analog value and load value
+  // we will find sensor resistor.
+  return ( ((float)RL_VALUE*(4096-raw_adc)/raw_adc));     
+}
+
 static void Read_adc(void)
 {
-    static int32_t adc_val=0,adc_val2=0;
+    static float adc_val=0;
+    static int16_t adc_val2=0;
     static int16_t count =0;
+    int16_t ppm=0;
+
 
     if(count==20)
     {
       adc_val=adc_val/20;
-      adc_val2=adc_val2/20;
-      tfp_printf("Noise  level is %ld,smoke level is %ldppm\n", adc_val,adc_val2);
+      adc_val = adc_val/Ro;
+
+      adc_val2 = adc_val2/20;
+      ppm=GetPercentage(adc_val, SmokeCurve);
+      tfp_printf("Noise  level is %d,smoke level is %d ppm\n", adc_val2,ppm);
+      // set the noise and co2 value here in the global vars
+      noise_level =adc_val2;
+      co2_level = ppm;
+      //tfp_printf("noise=0x%x co2=0x%x\n", noise_level, co2_level);
+
       count=0;
       adc_val=0;
+      adc_val2=0;
     }
 
     led_red_on();
     hal_nop_delay_ms(10);
     led_red_off();
 
-    adc_val+= simple_adc_get_value(SIMPLE_ADC_GAIN1_6, ANALOG_PIN_2);
+    adc_val+= ResistanceCalculation(simple_adc_get_value(SIMPLE_ADC_GAIN1_6, ANALOG_PIN_2));
+
     adc_val2+= simple_adc_get_value(SIMPLE_ADC_GAIN1_6, ANALOG_PIN_3);
-    //pnarasim : tbd
-    // set the noise and co2 value here in the global vars
-    noise_level = adc_val;
-    co2_level = adc_val2;
-count++;
+
+    count++;
  }
+
+
+
+// This function assumes that sensor is in clean air.
+ float SensorCalibration()
+{
+  int i;                                   
+  float val=0;
+
+  //take multiple samples and calculate the average value
+  for (i=0;i<50;i++) {                   
+    val += ResistanceCalculation(simple_adc_get_value(SIMPLE_ADC_GAIN1_6, ANALOG_PIN_2));
+    hal_nop_delay_ms(100);
+  }
+  val = val/50;
+  //divided by RO_CLEAN_AIR_FACTOR yields the Ro
+  //according to the chart in the datasheet
+  val = val/RO_CLEAN_AIR_FACTOR;                        
+                                                    
+  return val;
+}
+
 // create ble beacon
 static void create_noise_adv(void){
     dump_log();
-    static uint8_t count = 0;
-    count++;
+    static uint8_t beacon_count = 0;
+    beacon_count++;
+    int8_t n=0, c=0;
+
+    n=noise_level/BYTE_FACTOR;
+    c=co2_level/BYTE_FACTOR;
+    tfp_printf("noise=0x%x co2=0x%x n=0x%x, c=0x%x\n", noise_level, co2_level, n, c);
     
     uint8_t noise_adv_data[] = {
             /* Len, type, data */
-            0x07, GAP_ADV_NAME_FULL, 'H', 'W','-', 'I', 'D', '2',
-	    0x02, HW_GAP_ADV_NOISE_LEVEL, noise_level, 
-	    0x02, HW_GAP_ADV_CO2_LEVEL, co2_level, 
-            0x02, 0xFF,0x004C
+	    0x04, GAP_ADV_NAME_FULL, 'H', 'W', '2',
+	    0x02, HW_GAP_ADV_NOISE_LEVEL, n, 
+	    0x02, HW_GAP_ADV_CO2_LEVEL, c,     
+	    0x03, GAP_ADV_MANUF_DATA, 0x004C
 	};
+    tfp_printf("Size of ble adv data = %d\n", sizeof(noise_adv_data));
     ble_adv_set_adv_data(sizeof(noise_adv_data), noise_adv_data);
 }
 
@@ -174,7 +251,13 @@ int main(void)
 
     hfclk_xtal_init_blocking();
     lfclk_init(LFCLK_SRC_Xtal);
-
+    tfp_printf("Calibrating Smoke sensor");
+    Ro=SensorCalibration(); //Please make sure the sensor is in clean air
+    //when you perform the calibration
+    tfp_printf("Calibration is done...\n\r");
+    tfp_printf("Ro=%4dkohm ",(int16_t)Ro);
+    tfp_printf("\n\r");
+    tfp_printf("sizeof float = %d\n", sizeof(float));
     uint8_t adrs[] = {0x0B, 0x0E, 0x0A, 0x0C, 0x00, 0x01};
     uint8_t adv_data[] = {
             /* Len, type, data */
