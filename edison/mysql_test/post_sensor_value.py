@@ -8,6 +8,8 @@ import sys
 import subprocess
 import string
 import re
+import time
+import os
 
 add_reading= ("INSERT INTO hw_data " 
                 " (house_id, sensor_id, sensor_data, timeofpost) " 
@@ -24,14 +26,22 @@ co2_id=2
 hw_str = ''
 noise_level_id = ''
 co2_level_id = ''
+outfilename='/home/root/bleout.txt'
 
 def scan_and_get_sensor_readings(hw_str):
     noise_level=0
     co2_level=0
-    f = open("bleout.txt", "w")
+    with open(outfilename, "w"):
+        pass
+    print ("Emptied the output file ", outfilename)
+
+    f = open(outfilename, "w")
     subprocess.call(["blescan", "-n"], stdout=f)
     f.close()
-    infile=open("bleout.txt", "r")
+    if (os.stat(outfilename) == 0):
+        print("No output captured in %s, sleep and try again\n", outfilename)
+        return None, None
+    infile=open(outfilename, "r")
     for line in infile:
         words= line.partition(":")
         #print (words[0], " = ", words[2])
@@ -77,7 +87,15 @@ def main():
     #show_dbs(cursor)
     # get data and post it to the table
     while (1):
-        noise_level, co2_level = scan_and_get_sensor_readings(hw_str)
+        noise_level, co2_level = scan_and_get_sensor_readings(hw_str)  or (None,None)
+        if noise_level is None:
+            print("Found no noise sensor data\n")
+            time.sleep(5)
+            continue
+        if co2_level is None:
+            print("Found no co2 sensor data\n")
+            time.sleep(5)
+            continue
         n = int(noise_level, 16) 
         c = int(co2_level,16 )
         #we reduced the the noise to 1 byte to fit easily in the beacon
