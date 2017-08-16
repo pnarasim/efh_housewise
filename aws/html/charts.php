@@ -1,7 +1,7 @@
 <html>
 
    <head>
-    <title>FusionCharts XT - Simple Column 2D Chart</title>
+    <title>HouseWise Charts</title>
     <!--
         Step 2:  Include the `fusioncharts.js` file. This file is needed to render the chart.
          Ensure that the path to this JS file is correct. Otherwise, it may lead to JavaScript errors.
@@ -60,6 +60,8 @@ $numdatapoints=40;
           "usePlotGradientColor"=> "0",
           "plotBorderAlpha"=> "10",
           "showXAxisLine"=> "1",
+          "xAxisName"=>"Time (seconds)",
+	  "yAxisName"=>"Noise level (analog reading)",
           "xAxisLineColor" => "#999999",
           "showValues" => "0",
           "divlineColor" => "#999999",
@@ -105,6 +107,8 @@ $numdatapoints=40;
           "usePlotGradientColor"=> "0",
           "plotBorderAlpha"=> "10",
           "showXAxisLine"=> "1",
+          "xAxisName"=>"Time (seconds)",
+          "yAxisName"=>"Co2 level (ppm)",
           "xAxisLineColor" => "#999999",
           "showValues" => "0",
           "divlineColor" => "#999999",
